@@ -32,18 +32,13 @@ st.markdown(
 )
 
 st.title("NSE Daily Breakout Screener")
-st.subheader("NSE à¤¡à¥‡à¤²à¥€ à¤¬à¥à¤°à¥‡à¤•à¤†à¤‰à¤Ÿ à¤¶à¥‡à¤¯à¤° à¤¸à¥à¤•à¥ˆà¤¨à¤°")
-st.caption("English + à¤¹à¤¿à¤‚à¤¦à¥€ | Daily candles / à¤¦à¥ˆà¤¨à¤¿à¤• à¤•à¥ˆà¤‚à¤¡à¤² | NSE cash shares / NSE à¤•à¥ˆà¤¶ à¤¶à¥‡à¤¯à¤°")
+st.caption("NSE cash market â€¢ Daily candles â€¢ Previous-month high breakout â€¢ Next-day red confirmation")
 
 st.info(
     """
-    **English:** Green daily candle Close must be above the previous completed calendar month's High.
+    **Setup rules:** The green daily candle's Close must be above the previous completed calendar month's High.
     The immediately following completed daily candle must be red, and its High must be below the green candle's High.
     Today's incomplete candle is ignored.
-
-    **à¤¹à¤¿à¤‚à¤¦à¥€:** à¤¹à¤°à¥€ à¤¦à¥ˆà¤¨à¤¿à¤• à¤•à¥ˆà¤‚à¤¡à¤² à¤•à¤¾ Close à¤ªà¤¿à¤›à¤²à¥‡ à¤ªà¥‚à¤°à¥‡ à¤•à¥ˆà¤²à¥‡à¤‚à¤¡à¤° à¤®à¤¹à¥€à¤¨à¥‡ à¤•à¥‡ High à¤¸à¥‡ à¤Šà¤ªà¤° à¤¹à¥‹à¤¨à¤¾ à¤šà¤¾à¤¹à¤¿à¤à¥¤
-    à¤‰à¤¸à¤•à¥‡ à¤¤à¥à¤°à¤‚à¤¤ à¤…à¤—à¤²à¥‡ à¤ªà¥‚à¤°à¥‡ à¤Ÿà¥à¤°à¥‡à¤¡à¤¿à¤‚à¤— à¤¦à¤¿à¤¨ à¤•à¥€ à¤•à¥ˆà¤‚à¤¡à¤² à¤²à¤¾à¤² à¤¹à¥‹à¤¨à¥€ à¤šà¤¾à¤¹à¤¿à¤ à¤”à¤° à¤‰à¤¸à¤•à¤¾ High, à¤¹à¤°à¥€ à¤•à¥ˆà¤‚à¤¡à¤² à¤•à¥‡ High à¤¸à¥‡ à¤•à¤® à¤¹à¥‹à¤¨à¤¾ à¤šà¤¾à¤¹à¤¿à¤à¥¤
-    à¤†à¤œ à¤•à¥€ à¤…à¤§à¥‚à¤°à¥€ à¤•à¥ˆà¤‚à¤¡à¤² à¤•à¥‹ à¤¶à¤¾à¤®à¤¿à¤² à¤¨à¤¹à¥€à¤‚ à¤•à¤¿à¤¯à¤¾ à¤œà¤¾à¤à¤—à¤¾à¥¤
     """
 )
 
@@ -73,12 +68,12 @@ def get_symbols():
 
     if equity is None or equity.empty:
         raise RuntimeError(
-            "NSE equity list download failed. / NSE à¤¶à¥‡à¤¯à¤° à¤¸à¥‚à¤šà¥€ à¤¡à¤¾à¤‰à¤¨à¤²à¥‹à¤¡ à¤¨à¤¹à¥€à¤‚ à¤¹à¥à¤ˆà¥¤"
+            "NSE equity list download failed."
         )
 
     equity.columns = [str(c).strip().upper() for c in equity.columns]
     if "SYMBOL" not in equity.columns:
-        raise RuntimeError("NSE list mein SYMBOL column nahi mila / NSE à¤¸à¥‚à¤šà¥€ à¤®à¥‡à¤‚ SYMBOL à¤•à¥‰à¤²à¤® à¤¨à¤¹à¥€à¤‚ à¤®à¤¿à¤²à¤¾à¥¤")
+        raise RuntimeError("NSE list is missing the SYMBOL column.")
     if "SERIES" in equity.columns:
         equity = equity[equity["SERIES"].astype(str).str.strip().str.upper().eq("EQ")]
     cash_symbols = set(equity["SYMBOL"].dropna().astype(str).str.strip().str.upper())
@@ -96,8 +91,7 @@ def get_symbols():
 
     if fo is None or fo.empty:
         raise RuntimeError(
-            "F&O list download failed; scan stopped to avoid wrong results. / "
-            "F&O à¤¸à¥‚à¤šà¥€ à¤¡à¤¾à¤‰à¤¨à¤²à¥‹à¤¡ à¤¨à¤¹à¥€à¤‚ à¤¹à¥à¤ˆ, à¤‡à¤¸à¤²à¤¿à¤ à¤—à¤²à¤¤ à¤°à¤¿à¤œà¤²à¥à¤Ÿ à¤¸à¥‡ à¤¬à¤šà¤¨à¥‡ à¤•à¥‡ à¤²à¤¿à¤ à¤¸à¥à¤•à¥ˆà¤¨ à¤°à¥‹à¤•à¤¾ à¤—à¤¯à¤¾à¥¤"
+            "F&O list download failed; scan stopped to avoid including F&O stocks."
         )
 
     fo.columns = [str(c).strip().upper() for c in fo.columns]
@@ -106,7 +100,7 @@ def get_symbols():
         if column in fo.columns:
             fo_symbols.update(fo[column].dropna().astype(str).str.strip().str.upper())
     if not fo_symbols:
-        raise RuntimeError("F&O symbol column not identified / F&O à¤¸à¥‚à¤šà¥€ à¤®à¥‡à¤‚ à¤¶à¥‡à¤¯à¤° à¤•à¥‰à¤²à¤® à¤¨à¤¹à¥€à¤‚ à¤®à¤¿à¤²à¤¾à¥¤")
+        raise RuntimeError("Could not identify the symbol column in the F&O list.")
 
     return sorted(cash_symbols - fo_symbols)
 
@@ -176,45 +170,45 @@ def scan_symbol(symbol, minimum_price, maximum_price):
             and float(red["High"]) < float(green["High"])
         ):
             return {
-                "Symbol / à¤¶à¥‡à¤¯à¤°": symbol,
-                "Latest Close (â‚¹) / à¤¤à¤¾à¤œà¤¼à¤¾ à¤­à¤¾à¤µ": round(latest_price, 2),
-                "Previous Month High (â‚¹) / à¤ªà¤¿à¤›à¤²à¥‡ à¤®à¤¹à¥€à¤¨à¥‡ à¤•à¤¾ High": round(previous_month_high, 2),
-                "Green Candle Date / à¤¹à¤°à¥€ à¤•à¥ˆà¤‚à¤¡à¤² à¤•à¥€ à¤¤à¤¾à¤°à¥€à¤–": str(pd.Timestamp(data.index[i - 1]).date()),
-                "Green Candle High (â‚¹) / à¤¹à¤°à¥€ à¤•à¥ˆà¤‚à¤¡à¤² à¤•à¤¾ High": round(float(green["High"]), 2),
-                "Green Candle Close (â‚¹) / à¤¹à¤°à¥€ à¤•à¥ˆà¤‚à¤¡à¤² à¤•à¤¾ Close": round(float(green["Close"]), 2),
-                "Red Candle Date / à¤²à¤¾à¤² à¤•à¥ˆà¤‚à¤¡à¤² à¤•à¥€ à¤¤à¤¾à¤°à¥€à¤–": str(pd.Timestamp(data.index[i]).date()),
-                "Red Candle High (â‚¹) / à¤²à¤¾à¤² à¤•à¥ˆà¤‚à¤¡à¤² à¤•à¤¾ High": round(float(red["High"]), 2),
-                "Red Candle Close (â‚¹) / à¤²à¤¾à¤² à¤•à¥ˆà¤‚à¤¡à¤² à¤•à¤¾ Close": round(float(red["Close"]), 2),
+                "Symbol": symbol,
+                "Latest Close (â‚¹)": round(latest_price, 2),
+                "Previous Month High (â‚¹)": round(previous_month_high, 2),
+                "Green Candle Date": str(pd.Timestamp(data.index[i - 1]).date()),
+                "Green Candle High (â‚¹)": round(float(green["High"]), 2),
+                "Green Candle Close (â‚¹)": round(float(green["Close"]), 2),
+                "Red Candle Date": str(pd.Timestamp(data.index[i]).date()),
+                "Red Candle High (â‚¹)": round(float(red["High"]), 2),
+                "Red Candle Close (â‚¹)": round(float(red["Close"]), 2),
             }
     return None
 
 
 with st.sidebar:
-    st.header("Scan Settings / à¤¸à¥à¤•à¥ˆà¤¨ à¤¸à¥‡à¤Ÿà¤¿à¤‚à¤—à¥à¤¸")
-    min_price = st.number_input("Minimum Price / à¤¨à¥à¤¯à¥‚à¤¨à¤¤à¤® à¤­à¤¾à¤µ (â‚¹)", min_value=0.0, value=100.0, step=10.0)
-    max_price = st.number_input("Maximum Price / à¤…à¤§à¤¿à¤•à¤¤à¤® à¤­à¤¾à¤µ (â‚¹)", min_value=1.0, value=5000.0, step=100.0)
+    st.header("Scan Settings")
+    min_price = st.number_input("Minimum Price (â‚¹)", min_value=0.0, value=100.0, step=10.0)
+    max_price = st.number_input("Maximum Price (â‚¹)", min_value=1.0, value=5000.0, step=100.0)
     scan_size = st.selectbox(
-        "Stocks to Scan / à¤•à¤¿à¤¤à¤¨à¥‡ à¤¶à¥‡à¤¯à¤° à¤¸à¥à¤•à¥ˆà¤¨ à¤•à¤°à¥‡à¤‚",
+        "Stocks to Scan",
         [
-            "All eligible stocks / à¤¸à¤­à¥€ à¤¯à¥‹à¤—à¥à¤¯ à¤¶à¥‡à¤¯à¤°",
-            "First 100 (test) / à¤ªà¤¹à¤²à¥‡ 100 (à¤Ÿà¥‡à¤¸à¥à¤Ÿ)",
-            "First 250 / à¤ªà¤¹à¤²à¥‡ 250",
+            "All eligible cash stocks",
+            "First 100 (test)",
+            "First 250",
         ],
     )
-    st.caption("Full scan may take several minutes. / à¤ªà¥‚à¤°à¤¾ à¤¸à¥à¤•à¥ˆà¤¨ à¤•à¥à¤› à¤®à¤¿à¤¨à¤Ÿ à¤²à¥‡ à¤¸à¤•à¤¤à¤¾ à¤¹à¥ˆà¥¤")
+    st.caption("Full scan may take several minutes. Market data may be delayed or incomplete.")
 
 if min_price > max_price:
-    st.error("Minimum price must not exceed maximum price. / à¤¨à¥à¤¯à¥‚à¤¨à¤¤à¤® à¤­à¤¾à¤µ à¤…à¤§à¤¿à¤•à¤¤à¤® à¤­à¤¾à¤µ à¤¸à¥‡ à¤œà¤¼à¥à¤¯à¤¾à¤¦à¤¾ à¤¨à¤¹à¥€à¤‚ à¤¹à¥‹ à¤¸à¤•à¤¤à¤¾à¥¤")
+    st.error("Minimum price must not exceed maximum price.")
     st.stop()
 
 metric1, metric2, metric3 = st.columns(3)
-metric1.metric("Timeframe / à¤¸à¤®à¤¯", "Daily / à¤¦à¥ˆà¤¨à¤¿à¤•")
-metric2.metric("Price Range / à¤­à¤¾à¤µ à¤¸à¥€à¤®à¤¾", f"â‚¹{min_price:g}â€“â‚¹{max_price:g}")
-metric3.metric("Market / à¤¬à¤¾à¤œà¤¼à¤¾à¤°", "NSE Cash / à¤•à¥ˆà¤¶")
+metric1.metric("Timeframe", "Daily")
+metric2.metric("Price Range", f"â‚¹{min_price:g}â€“â‚¹{max_price:g}")
+metric3.metric("Market", "NSE Cash (F&O excluded)")
 
-if st.button("ðŸ”Ž Scan Stocks Now / à¤…à¤­à¥€ à¤¶à¥‡à¤¯à¤° à¤¸à¥à¤•à¥ˆà¤¨ à¤•à¤°à¥‡à¤‚", type="primary", use_container_width=True):
+if st.button("ðŸ”Ž Scan Stocks Now", type="primary", use_container_width=True):
     try:
-        with st.spinner("Loading NSE symbol lists... / NSE à¤¶à¥‡à¤¯à¤° à¤¸à¥‚à¤šà¥€ à¤²à¥‹à¤¡ à¤¹à¥‹ à¤°à¤¹à¥€ à¤¹à¥ˆ..."):
+        with st.spinner("Loading NSE symbol lists..."):
             symbols = get_symbols()
 
         if scan_size.startswith("First 100"):
@@ -229,7 +223,7 @@ if st.button("ðŸ”Ž Scan Stocks Now / à¤…à¤­à¥€ à¤¶à¥‡à¤
         status = st.empty()
 
         for number, symbol in enumerate(symbols, start=1):
-            status.write(f"Checking / à¤œà¤¾à¤à¤š à¤°à¤¹à¥‡ à¤¹à¥ˆà¤‚: **{symbol}** ({number}/{len(symbols)})")
+            status.write(f"Checking **{symbol}** ({number}/{len(symbols)})")
             try:
                 match = scan_symbol(symbol, min_price, max_price)
                 if match:
@@ -244,15 +238,15 @@ if st.button("ðŸ”Ž Scan Stocks Now / à¤…à¤­à¥€ à¤¶à¥‡à¤
 
         if not result_df.empty:
             result_df = result_df.sort_values(
-                ["Red Candle Date / à¤²à¤¾à¤² à¤•à¥ˆà¤‚à¤¡à¤² à¤•à¥€ à¤¤à¤¾à¤°à¥€à¤–", "Symbol / à¤¶à¥‡à¤¯à¤°"],
+                ["Red Candle Date", "Symbol"],
                 ascending=[False, True],
             ).reset_index(drop=True)
             st.success(
-                f"Scan complete: {len(result_df)} match(es). / à¤¸à¥à¤•à¥ˆà¤¨ à¤ªà¥‚à¤°à¤¾: {len(result_df)} à¤¶à¥‡à¤¯à¤° à¤®à¤¿à¤²à¥‡à¥¤"
+                f"Scan complete: {len(result_df)} matching stock(s)."
             )
             st.dataframe(result_df, use_container_width=True, hide_index=True)
             st.download_button(
-                "â¬‡ï¸ Download CSV / CSV à¤¡à¤¾à¤‰à¤¨à¤²à¥‹à¤¡ à¤•à¤°à¥‡à¤‚",
+                "â¬‡ï¸ Download CSV",
                 data=result_df.to_csv(index=False).encode("utf-8-sig"),
                 file_name="nse_daily_breakout_results.csv",
                 mime="text/csv",
@@ -262,7 +256,7 @@ if st.button("ðŸ”Ž Scan Stocks Now / à¤…à¤­à¥€ à¤¶à¥‡à¤
             with pd.ExcelWriter(excel_buffer, engine="openpyxl") as writer:
                 result_df.to_excel(writer, index=False, sheet_name="Results")
             st.download_button(
-                "â¬‡ï¸ Download Excel / Excel à¤¡à¤¾à¤‰à¤¨à¤²à¥‹à¤¡ à¤•à¤°à¥‡à¤‚",
+                "â¬‡ï¸ Download Excel",
                 data=excel_buffer.getvalue(),
                 file_name="nse_daily_breakout_results.xlsx",
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -270,47 +264,32 @@ if st.button("ðŸ”Ž Scan Stocks Now / à¤…à¤­à¥€ à¤¶à¥‡à¤
             )
         else:
             st.warning(
-                "No matching stocks found in this scan. / à¤‡à¤¸ à¤¸à¥à¤•à¥ˆà¤¨ à¤®à¥‡à¤‚ à¤•à¥‹à¤ˆ à¤¶à¥‡à¤¯à¤° à¤¨à¤¿à¤¯à¤®à¥‹à¤‚ à¤¸à¥‡ à¤®à¥‡à¤² à¤¨à¤¹à¥€à¤‚ à¤–à¤¾à¤¯à¤¾à¥¤"
+                "No stocks matched the rules in this scan."
             )
         if failures:
             st.caption(
-                f"{failures} symbol(s) could not be checked due to data/network errors. / "
-                f"{failures} à¤¶à¥‡à¤¯à¤° à¤¡à¥‡à¤Ÿà¤¾ à¤¯à¤¾ à¤¨à¥‡à¤Ÿà¤µà¤°à¥à¤• à¤¸à¤®à¤¸à¥à¤¯à¤¾ à¤•à¥‡ à¤•à¤¾à¤°à¤£ à¤šà¥‡à¤• à¤¨à¤¹à¥€à¤‚ à¤¹à¥‹ à¤¸à¤•à¥‡à¥¤"
+                f"{failures} symbol(s) could not be checked due to data/network errors."
             )
     except Exception as error:
-        st.error(f"Scan failed / à¤¸à¥à¤•à¥ˆà¤¨ à¤…à¤¸à¤«à¤²: {error}")
+        st.error(f"Scan failed: {error}")
 else:
     st.write(
-        "Set the price range in the sidebar and press the scan button. / "
-        "à¤¸à¤¾à¤‡à¤¡à¤¬à¤¾à¤° à¤®à¥‡à¤‚ à¤­à¤¾à¤µ à¤¸à¥€à¤®à¤¾ à¤šà¥à¤¨à¥‡à¤‚ à¤”à¤° à¤¸à¥à¤•à¥ˆà¤¨ à¤¬à¤Ÿà¤¨ à¤¦à¤¬à¤¾à¤à¤à¥¤"
+        "Set the price range in the sidebar and press Scan Stocks Now."
     )
     st.caption(
-        "Results will appear here. / à¤°à¤¿à¤œà¤²à¥à¤Ÿ à¤‡à¤¸à¥€ à¤ªà¥‡à¤œ à¤ªà¤° à¤¦à¤¿à¤–à¥‡à¤‚à¤—à¥‡à¥¤ "
-        "CSV and Excel downloads appear after the scan. / à¤¸à¥à¤•à¥ˆà¤¨ à¤•à¥‡ à¤¬à¤¾à¤¦ CSV à¤”à¤° Excel à¤¡à¤¾à¤‰à¤¨à¤²à¥‹à¤¡ à¤•à¤° à¤¸à¤•à¤¤à¥‡ à¤¹à¥ˆà¤‚à¥¤"
+        "Results will appear here. CSV and Excel download buttons appear after the scan."
     )
 
-with st.expander("ðŸ“˜ Scanner Rules / à¤¸à¥à¤•à¥ˆà¤¨à¤° à¤•à¥‡ à¤¨à¤¿à¤¯à¤®"):
+with st.expander("ðŸ“˜ Scanner Rules"):
     st.markdown(
         """
-        **English**
-        1. NSE EQ cash shares, excluding symbols found in the NSE F&O list.
-        2. Latest completed daily close must be within the selected price range.
-        3. Green candle: Close > Open and Close > previous completed calendar month's High.
-        4. Immediately next completed daily candle must be red: Close < Open.
-        5. Red candle High must be lower than the green candle High.
+        1. NSE EQ cash-market symbols are included; symbols listed in the NSE F&O list are excluded.
+        2. The latest completed daily close must be within the selected price range.
+        3. Green candle: Close > Open and Close > the previous completed calendar month's High.
+        4. The immediately following completed daily candle must be red: Close < Open.
+        5. The red candle's High must be lower than the green breakout candle's High.
         6. Today's incomplete candle is ignored.
-
-        **à¤¹à¤¿à¤‚à¤¦à¥€**
-        1. NSE EQ à¤•à¥ˆà¤¶ à¤¶à¥‡à¤¯à¤° à¤²à¤¿à¤ à¤œà¤¾à¤¤à¥‡ à¤¹à¥ˆà¤‚; F&O à¤¸à¥‚à¤šà¥€ à¤µà¤¾à¤²à¥‡ à¤¶à¥‡à¤¯à¤° à¤¹à¤Ÿà¤¾à¤ à¤œà¤¾à¤¤à¥‡ à¤¹à¥ˆà¤‚à¥¤
-        2. à¤†à¤–à¤¿à¤°à¥€ à¤ªà¥‚à¤°à¥€ à¤¦à¥ˆà¤¨à¤¿à¤• à¤•à¥ˆà¤‚à¤¡à¤² à¤•à¤¾ à¤­à¤¾à¤µ à¤šà¥à¤¨à¥€ à¤—à¤ˆ à¤¸à¥€à¤®à¤¾ à¤®à¥‡à¤‚ à¤¹à¥‹à¤¨à¤¾ à¤šà¤¾à¤¹à¤¿à¤à¥¤
-        3. à¤¹à¤°à¥€ à¤•à¥ˆà¤‚à¤¡à¤² à¤•à¤¾ Close à¤ªà¤¿à¤›à¤²à¥‡ à¤ªà¥‚à¤°à¥‡ à¤•à¥ˆà¤²à¥‡à¤‚à¤¡à¤° à¤®à¤¹à¥€à¤¨à¥‡ à¤•à¥‡ High à¤¸à¥‡ à¤Šà¤ªà¤° à¤¹à¥‹à¤¨à¤¾ à¤šà¤¾à¤¹à¤¿à¤à¥¤
-        4. à¤‰à¤¸à¤•à¥‡ à¤¤à¥à¤°à¤‚à¤¤ à¤…à¤—à¤²à¥‡ à¤ªà¥‚à¤°à¥‡ à¤Ÿà¥à¤°à¥‡à¤¡à¤¿à¤‚à¤— à¤¦à¤¿à¤¨ à¤•à¥€ à¤•à¥ˆà¤‚à¤¡à¤² à¤²à¤¾à¤² à¤¹à¥‹à¤¨à¥€ à¤šà¤¾à¤¹à¤¿à¤à¥¤
-        5. à¤²à¤¾à¤² à¤•à¥ˆà¤‚à¤¡à¤² à¤•à¤¾ High, à¤¹à¤°à¥€ à¤•à¥ˆà¤‚à¤¡à¤² à¤•à¥‡ High à¤¸à¥‡ à¤¨à¥€à¤šà¥‡ à¤¹à¥‹à¤¨à¤¾ à¤šà¤¾à¤¹à¤¿à¤à¥¤
-        6. à¤†à¤œ à¤•à¥€ à¤…à¤§à¥‚à¤°à¥€ à¤•à¥ˆà¤‚à¤¡à¤² à¤•à¥‹ à¤…à¤¨à¤¦à¥‡à¤–à¤¾ à¤•à¤¿à¤¯à¤¾ à¤œà¤¾à¤¤à¤¾ à¤¹à¥ˆà¥¤
         """
     )
 
-st.caption(
-    "Educational screening tool only â€” not a buy/sell recommendation. / "
-    "à¤¯à¤¹ à¤•à¥‡à¤µà¤² à¤¸à¥à¤•à¥à¤°à¥€à¤¨à¤¿à¤‚à¤— à¤•à¥‡ à¤²à¤¿à¤ à¤¹à¥ˆ, à¤–à¤°à¥€à¤¦à¤¨à¥‡ à¤¯à¤¾ à¤¬à¥‡à¤šà¤¨à¥‡ à¤•à¥€ à¤¸à¤²à¤¾à¤¹ à¤¨à¤¹à¥€à¤‚à¥¤"
-)
+st.caption("Educational screening tool only â€” not a buy/sell recommendation.")
