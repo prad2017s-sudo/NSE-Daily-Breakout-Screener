@@ -37,7 +37,7 @@ st.info(
     """
     **Rules:** The first green daily candle of the current month must close above the previous completed month's High from below.
     After it, exactly 1, 2, or 3 additional green daily candles must form, followed immediately by a red candle.
-    The red candle's High must be below the original breakout candle's High.
+    The red candle's High must be below the immediately preceding green candle's High.
     Only one signal per symbol per month. Today's incomplete candle is ignored.
     """
 )
@@ -109,7 +109,7 @@ def get_symbols():
 def download_daily(symbol):
     try:
         data = yf.Ticker(f"{symbol}.NS").history(
-            period="9mo", interval="1d", auto_adjust=False, actions=False
+            period="1y", interval="1d", auto_adjust=False, actions=False
         )
         if data is None or data.empty:
             return pd.DataFrame()
@@ -187,6 +187,7 @@ def scan_symbol(symbol, minimum_price, maximum_price):
 
     breakout = data.iloc[breakout_i]
     breakout_high = float(breakout["High"])
+    last_green_high = breakout_high
 
     # Valid patterns:
     # breakout green -> 1 green -> red
@@ -207,12 +208,13 @@ def scan_symbol(symbol, minimum_price, maximum_price):
 
         if close_price > open_price:
             green_count += 1
+            last_green_high = high_price
             if green_count > 3:
                 break
             continue
 
         if close_price < open_price:
-            if 1 <= green_count <= 3 and high_price < breakout_high:
+            if 1 <= green_count <= 3 and high_price < last_green_high:
                 red_i = j
                 red = candle
             break
@@ -223,8 +225,19 @@ def scan_symbol(symbol, minimum_price, maximum_price):
     if red is None:
         return None
 
+    # 52-week low proximity and a simple rising-trend score for result ranking.
+    one_year_low = float(data["Low"].tail(252).min())
+    percent_above_52w_low = ((latest_price / one_year_low) - 1.0) * 100.0 if one_year_low > 0 else float("nan")
+    close_series = data["Close"].astype(float)
+    ma5 = float(close_series.tail(5).mean()) if len(close_series) >= 5 else float("nan")
+    ma20 = float(close_series.tail(20).mean()) if len(close_series) >= 20 else float("nan")
+    rising_trend = bool(latest_price > ma20 and ma5 > ma20) if pd.notna(ma20) and pd.notna(ma5) else False
+
     return {
         "Symbol": symbol,
+        "Rising Trend": "Yes" if rising_trend else "No",
+        "52-Week Low (INR)": round(one_year_low, 2),
+        "% Above 52-Week Low": round(percent_above_52w_low, 2),
         "Latest Close (INR)": round(latest_price, 2),
         "Previous Month High (INR)": round(previous_month_high, 2),
         "Breakout Date": str(dates[breakout_i].date()),
@@ -291,10 +304,13 @@ if st.button("Scan Stocks Now", type="primary", use_container_width=True):
         result_df = pd.DataFrame(results)
 
         if not result_df.empty:
+            # Prioritize stocks showing a rising trend, then those still closest
+            # to their 52-week low, then the most recent confirmation.
+            result_df["Rising Trend Sort"] = result_df["Rising Trend"].eq("Yes").astype(int)
             result_df = result_df.sort_values(
-                ["Red Confirmation Date", "Symbol"],
-                ascending=[False, True],
-            ).reset_index(drop=True)
+                ["Rising Trend Sort", "% Above 52-Week Low", "Red Confirmation Date", "Symbol"],
+                ascending=[False, True, False, True],
+            ).drop(columns=["Rising Trend Sort"]).reset_index(drop=True)
             st.success(
                 f"Scan complete: {len(result_df)} matching stock(s)."
             )
@@ -341,9 +357,10 @@ with st.expander("Scanner Rules"):
         2. Latest completed daily close must be within the selected price range.
         3. The breakout candle is the first green daily candle in the current month that closes above the previous completed calendar month's High from below.
         4. After the breakout candle, the valid sequence is exactly 1, 2, or 3 additional green daily candles followed immediately by a red candle.
-        5. The red candle's High must be lower than the original breakout candle's High.
-        6. Only one signal per symbol per month; the setup resets when a new month starts.
-        7. Today's incomplete candle is ignored.
+        5. The red candle's High must be lower than the immediately preceding green candle's High.
+        6. Results prioritize a rising trend (latest close above the 20-day average and 5-day average above the 20-day average), then stocks closest to their 52-week Low.
+        7. Only one signal per symbol per month; the setup resets when a new month starts.
+        8. Today's incomplete candle is ignored.
         """
     )
 
