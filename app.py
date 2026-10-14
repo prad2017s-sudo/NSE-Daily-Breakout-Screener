@@ -292,7 +292,7 @@ if st.button("Scan Stocks Now", type="primary", use_container_width=True):
 
         if not result_df.empty:
             result_df = result_df.sort_values(
-                ["Red Candle Date", "Symbol"],
+                ["Red Confirmation Date", "Symbol"],
                 ascending=[False, True],
             ).reset_index(drop=True)
             st.success(
