@@ -17,13 +17,13 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-st.title("ðŸ“ˆ NSE Daily Breakout Screener")
-st.caption("NSE cash market â€¢ Daily candles â€¢ Previous-month high breakout â€¢ Next-day red confirmation")
+st.title("ðŸ“ˆ NSE Daily Breakout Screener | NSE à¤¡à¥‡à¤²à¥€ à¤¬à¥à¤°à¥‡à¤•à¤†à¤‰à¤Ÿ à¤¸à¥à¤•à¥ˆà¤¨à¤°")
+st.caption("NSE Cash Market / à¤¨à¤•à¤¦ à¤¬à¤¾à¤œà¤¾à¤° â€¢ Daily Candles / à¤¦à¥ˆà¤¨à¤¿à¤• à¤•à¥ˆà¤‚à¤¡à¤² â€¢ Previous Month High Breakout / à¤ªà¤¿à¤›à¤²à¥‡ à¤®à¤¹à¥€à¤¨à¥‡ à¤•à¥‡ à¤¹à¤¾à¤ˆ à¤¸à¥‡ à¤¬à¥à¤°à¥‡à¤•à¤†à¤‰à¤Ÿ â€¢ Next-day Red Confirmation / à¤…à¤—à¤²à¥‡ à¤¦à¤¿à¤¨ à¤²à¤¾à¤² à¤•à¥ˆà¤‚à¤¡à¤² à¤•à¥€ à¤ªà¥à¤·à¥à¤Ÿà¤¿")
 
 st.info(
-    "Setup: Green daily candle Close > previous completed calendar month's High. "
-    "The immediately following completed daily candle must be red, and its High must be "
-    "below the green breakout candle's High. Today's incomplete candle is ignored."
+    "à¤¨à¤¿à¤¯à¤® / Rule: Green daily candle à¤•à¤¾ Close à¤ªà¤¿à¤›à¤²à¥‡ à¤ªà¥‚à¤°à¥‡ calendar month à¤•à¥‡ High à¤¸à¥‡ à¤Šà¤ªà¤° à¤¹à¥‹à¥¤ "
+    "à¤‰à¤¸à¤•à¥‡ à¤¤à¥à¤°à¤‚à¤¤ à¤…à¤—à¤²à¥‡ completed daily candle à¤•à¤¾ à¤°à¤‚à¤— red à¤¹à¥‹ à¤”à¤° à¤‰à¤¸à¤•à¤¾ High, green breakout candle à¤•à¥‡ High à¤¸à¥‡ à¤•à¤® à¤¹à¥‹à¥¤ "
+    "Today's incomplete candle / à¤†à¤œ à¤•à¥€ à¤…à¤§à¥‚à¤°à¥€ à¤•à¥ˆà¤‚à¤¡à¤² à¤•à¥‹ ignore à¤•à¤¿à¤¯à¤¾ à¤œà¤¾à¤à¤—à¤¾à¥¤"
 )
 
 EQUITY_URLS = [
@@ -162,22 +162,22 @@ def scan_symbol(symbol, min_price, max_price):
     return None
 
 with st.sidebar:
-    st.header("âš™ï¸ Scan Settings")
-    min_price = st.number_input("Minimum price (â‚¹)", min_value=0.0, value=100.0, step=10.0)
-    max_price = st.number_input("Maximum price (â‚¹)", min_value=1.0, value=5000.0, step=100.0)
-    scan_size = st.selectbox("Stocks to scan", ["All eligible cash stocks", "First 100 (test)", "First 250"])
-    st.caption("Full scan may take several minutes. Market data may be delayed or incomplete.")
+    st.header("âš™ï¸ Scan Settings / à¤¸à¥à¤•à¥ˆà¤¨ à¤¸à¥‡à¤Ÿà¤¿à¤‚à¤—à¥à¤¸")
+    min_price = st.number_input("Minimum Price / à¤¨à¥à¤¯à¥‚à¤¨à¤¤à¤® à¤­à¤¾à¤µ (â‚¹)", min_value=0.0, value=100.0, step=10.0)
+    max_price = st.number_input("Maximum Price / à¤…à¤§à¤¿à¤•à¤¤à¤® à¤­à¤¾à¤µ (â‚¹)", min_value=1.0, value=5000.0, step=100.0)
+    scan_size = st.selectbox("Stocks to Scan / à¤•à¤¿à¤¤à¤¨à¥‡ à¤¶à¥‡à¤¯à¤° à¤¸à¥à¤•à¥ˆà¤¨ à¤•à¤°à¥‡à¤‚", ["All eligible cash stocks / à¤¸à¤­à¥€ à¤¯à¥‹à¤—à¥à¤¯ à¤¶à¥‡à¤¯à¤°", "First 100 (test) / à¤ªà¤¹à¤²à¥‡ 100 (à¤Ÿà¥‡à¤¸à¥à¤Ÿ)", "First 250 / à¤ªà¤¹à¤²à¥‡ 250"])
+    st.caption("Full scan à¤®à¥‡à¤‚ à¤•à¥à¤› à¤®à¤¿à¤¨à¤Ÿ à¤²à¤— à¤¸à¤•à¤¤à¥‡ à¤¹à¥ˆà¤‚à¥¤ à¤¬à¤¾à¤œà¤¾à¤° à¤•à¤¾ à¤¡à¥‡à¤Ÿà¤¾ à¤¦à¥‡à¤°à¥€ à¤¸à¥‡ à¤† à¤¸à¤•à¤¤à¤¾ à¤¹à¥ˆ à¤¯à¤¾ à¤…à¤§à¥‚à¤°à¤¾ à¤¹à¥‹ à¤¸à¤•à¤¤à¤¾ à¤¹à¥ˆà¥¤")
 
 if min_price > max_price:
     st.error("Minimum price maximum price se zyada nahi ho sakta.")
     st.stop()
 
 col1, col2, col3 = st.columns(3)
-col1.metric("Timeframe", "Daily")
-col2.metric("Price Range", f"â‚¹{min_price:g}â€“â‚¹{max_price:g}")
-col3.metric("Universe", "NSE Cash, F&O excluded")
+col1.metric("Timeframe / à¤¸à¤®à¤¯à¤¾à¤µà¤§à¤¿", "Daily / à¤¦à¥ˆà¤¨à¤¿à¤•")
+col2.metric("Price Range / à¤­à¤¾à¤µ à¤¸à¥€à¤®à¤¾", f"â‚¹{min_price:g}â€“â‚¹{max_price:g}")
+col3.metric("Universe / à¤¶à¥‡à¤¯à¤° à¤¸à¤®à¥‚à¤¹", "NSE Cash, F&O excluded / F&O à¤¹à¤Ÿà¤¾à¤•à¤°")
 
-if st.button("ðŸ”Ž Scan Stocks Now", type="primary", use_container_width=True):
+if st.button("ðŸ”Ž Scan Stocks Now / à¤…à¤­à¥€ à¤¶à¥‡à¤¯à¤° à¤¸à¥à¤•à¥ˆà¤¨ à¤•à¤°à¥‡à¤‚", type="primary", use_container_width=True):
     try:
         with st.spinner("NSE symbol lists load ho rahi hain..."):
             symbols = get_symbols()
@@ -186,7 +186,7 @@ if st.button("ðŸ”Ž Scan Stocks Now", type="primary", use_container_width=Tr
         elif scan_size == "First 250":
             symbols = symbols[:250]
 
-        st.write(f"**Stocks to scan:** {len(symbols)}")
+        st.write(f"**Stocks to scan / à¤¸à¥à¤•à¥ˆà¤¨ à¤¹à¥‹à¤¨à¥‡ à¤µà¤¾à¤²à¥‡ à¤¶à¥‡à¤¯à¤°:** {len(symbols)}")
         results, failures = [], 0
         progress = st.progress(0)
         status = st.empty()
@@ -209,10 +209,10 @@ if st.button("ðŸ”Ž Scan Stocks Now", type="primary", use_container_width=Tr
             result_df = result_df.sort_values(
                 ["Confirmation Red Date", "Symbol"], ascending=[False, True]
             ).reset_index(drop=True)
-            st.success(f"Scan complete: {len(result_df)} matching stock(s).")
+            st.success(f"Scan complete / à¤¸à¥à¤•à¥ˆà¤¨ à¤ªà¥‚à¤°à¤¾: {len(result_df)} matching stock(s) / à¤¶à¥‡à¤¯à¤° à¤®à¤¿à¤²à¥‡à¥¤")
             st.dataframe(result_df, use_container_width=True, hide_index=True)
             st.download_button(
-                "â¬‡ï¸ Download CSV",
+                "â¬‡ï¸ Download CSV / CSV à¤¡à¤¾à¤‰à¤¨à¤²à¥‹à¤¡ à¤•à¤°à¥‡à¤‚",
                 data=result_df.to_csv(index=False).encode("utf-8-sig"),
                 file_name="nse_daily_breakout_results.csv",
                 mime="text/csv",
@@ -222,23 +222,23 @@ if st.button("ðŸ”Ž Scan Stocks Now", type="primary", use_container_width=Tr
             with pd.ExcelWriter(excel, engine="openpyxl") as writer:
                 result_df.to_excel(writer, index=False, sheet_name="Breakout Results")
             st.download_button(
-                "â¬‡ï¸ Download Excel",
+                "â¬‡ï¸ Download Excel / Excel à¤¡à¤¾à¤‰à¤¨à¤²à¥‹à¤¡ à¤•à¤°à¥‡à¤‚",
                 data=excel.getvalue(),
                 file_name="nse_daily_breakout_results.xlsx",
                 mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                 use_container_width=True,
             )
         else:
-            st.warning("Is scan mein koi stock in rules se match nahi hua.")
+            st.warning("No stocks matched / à¤‡à¤¸ à¤¬à¤¾à¤° à¤•à¥‹à¤ˆ à¤¶à¥‡à¤¯à¤° à¤‡à¤¨ à¤¨à¤¿à¤¯à¤®à¥‹à¤‚ à¤¸à¥‡ à¤®à¥‡à¤² à¤¨à¤¹à¥€à¤‚ à¤–à¤¾à¤¯à¤¾à¥¤")
         if failures:
-            st.caption(f"{failures} symbols data/network error ke kaaran check nahi ho sake.")
+            st.caption(f"{failures} symbols / à¤¶à¥‡à¤¯à¤° à¤¡à¥‡à¤Ÿà¤¾ à¤¯à¤¾ à¤¨à¥‡à¤Ÿà¤µà¤°à¥à¤• à¤•à¥€ à¤¸à¤®à¤¸à¥à¤¯à¤¾ à¤•à¥‡ à¤•à¤¾à¤°à¤£ à¤šà¥‡à¤• à¤¨à¤¹à¥€à¤‚ à¤¹à¥‹ à¤¸à¤•à¥‡à¥¤")
     except Exception as e:
-        st.error(f"Scan start nahi ho saka: {e}")
+        st.error(f"Scan could not start / à¤¸à¥à¤•à¥ˆà¤¨ à¤¶à¥à¤°à¥‚ à¤¨à¤¹à¥€à¤‚ à¤¹à¥‹ à¤¸à¤•à¤¾: {e}")
 else:
-    st.write("Sidebar mein price range set karke **Scan Stocks Now** dabayein.")
-    st.caption("Results isi page par table mein aayenge. CSV aur Excel download buttons scan ke baad dikhenge.")
+    st.write("Sidebar à¤®à¥‡à¤‚ price range / à¤­à¤¾à¤µ à¤¸à¥€à¤®à¤¾ à¤šà¥à¤¨à¥‡à¤‚ à¤”à¤° **Scan Stocks Now / à¤…à¤­à¥€ à¤¶à¥‡à¤¯à¤° à¤¸à¥à¤•à¥ˆà¤¨ à¤•à¤°à¥‡à¤‚** à¤¦à¤¬à¤¾à¤à¤à¥¤")
+    st.caption("Results / à¤°à¤¿à¤œà¤²à¥à¤Ÿ à¤‡à¤¸à¥€ à¤ªà¥‡à¤œ à¤ªà¤° à¤Ÿà¥‡à¤¬à¤² à¤®à¥‡à¤‚ à¤†à¤à¤à¤—à¥‡à¥¤ à¤¸à¥à¤•à¥ˆà¤¨ à¤•à¥‡ à¤¬à¤¾à¤¦ CSV à¤”à¤° Excel à¤¡à¤¾à¤‰à¤¨à¤²à¥‹à¤¡ à¤¬à¤Ÿà¤¨ à¤¦à¤¿à¤–à¥‡à¤‚à¤—à¥‡à¥¤")
 
-with st.expander("ðŸ“˜ Scanner Rules"):
+with st.expander("ðŸ“˜ Scanner Rules / à¤¸à¥à¤•à¥ˆà¤¨à¤° à¤•à¥‡ à¤¨à¤¿à¤¯à¤®"):
     st.markdown("""
     1. NSE equity list mein EQ series ke shares.
     2. NSE F&O list mein maujood symbols exclude kiye jaate hain.
@@ -249,4 +249,4 @@ with st.expander("ðŸ“˜ Scanner Rules"):
     7. Aaj ki incomplete daily candle ignore hoti hai.
     8. Data source: Yahoo Finance; results ko trading se pehle independently verify karein.
     """)
-st.caption("Educational screening tool only â€” buy/sell recommendation nahi hai.")
+st.caption("For education only / à¤•à¥‡à¤µà¤² à¤œà¤¾à¤¨à¤•à¤¾à¤°à¥€ à¤•à¥‡ à¤²à¤¿à¤ â€” à¤¯à¤¹ à¤–à¤°à¥€à¤¦à¤¨à¥‡ à¤¯à¤¾ à¤¬à¥‡à¤šà¤¨à¥‡ à¤•à¥€ à¤¸à¤²à¤¾à¤¹ à¤¨à¤¹à¥€à¤‚ à¤¹à¥ˆà¥¤")
