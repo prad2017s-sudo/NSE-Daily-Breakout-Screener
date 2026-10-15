@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import io
 from datetime import datetime
 from zoneinfo import ZoneInfo
@@ -238,15 +239,11 @@ def scan_symbol(symbol, minimum_price, maximum_price):
         "Rising Trend": "Yes" if rising_trend else "No",
         "52-Week Low (INR)": round(one_year_low, 2),
         "% Above 52-Week Low": round(percent_above_52w_low, 2),
-        "Latest Close (INR)": round(latest_price, 2),
         "Previous Month High (INR)": round(previous_month_high, 2),
         "Breakout Date": str(dates[breakout_i].date()),
         "Breakout Candle High (INR)": round(breakout_high, 2),
-        "Breakout Candle Close (INR)": round(float(breakout["Close"]), 2),
-        "Green Candles After Breakout": green_count,
         "Red Confirmation Date": str(dates[red_i].date()),
         "Red Candle High (INR)": round(float(red["High"]), 2),
-        "Red Candle Close (INR)": round(float(red["Close"]), 2),
     }
 
 
@@ -311,27 +308,54 @@ if st.button("Scan Stocks Now", type="primary", use_container_width=True):
                 ["Rising Trend Sort", "% Above 52-Week Low", "Red Confirmation Date", "Symbol"],
                 ascending=[False, True, False, True],
             ).drop(columns=["Rising Trend Sort"]).reset_index(drop=True)
-            st.success(
-                f"Scan complete: {len(result_df)} matching stock(s)."
-            )
-            st.dataframe(result_df, use_container_width=True, hide_index=True)
-            st.download_button(
-                "Download CSV",
-                data=result_df.to_csv(index=False).encode("utf-8-sig"),
-                file_name="nse_daily_breakout_results.csv",
-                mime="text/csv",
-                use_container_width=True,
-            )
-            excel_buffer = io.BytesIO()
-            with pd.ExcelWriter(excel_buffer, engine="openpyxl") as writer:
-                result_df.to_excel(writer, index=False, sheet_name="Results")
-            st.download_button(
-                "Download Excel",
-                data=excel_buffer.getvalue(),
-                file_name="nse_daily_breakout_results.xlsx",
-                mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-                use_container_width=True,
-            )
+            st.success(f"Scan complete: {len(result_df)} matching stock(s).")
+
+            # Separate today's confirmed signals from all current-month signals.
+            # Today's unfinished candle is excluded by the scanner, so this tab
+            # only contains signals whose completed red confirmation is dated today.
+            today_text = datetime.now(IST).date().isoformat()
+            today_df = result_df[result_df["Red Confirmation Date"] == today_text].copy()
+            month_start_text = datetime.now(IST).date().replace(day=1).isoformat()
+            month_df = result_df[result_df["Red Confirmation Date"] >= month_start_text].copy()
+
+            today_tab, month_tab = st.tabs(["Today's Shares", "This Month's Shares"])
+            with today_tab:
+                st.caption(f"Confirmed red-candle signals dated {today_text}.")
+                if today_df.empty:
+                    st.info("No confirmed signals dated today. Today's incomplete candle is ignored.")
+                else:
+                    st.dataframe(today_df, use_container_width=True, hide_index=True)
+                    st.download_button(
+                        "Download Today's CSV",
+                        data=today_df.to_csv(index=False).encode("utf-8-sig"),
+                        file_name="nse_breakout_todays_shares.csv",
+                        mime="text/csv",
+                        use_container_width=True,
+                        key="download_today_csv",
+                    )
+            with month_tab:
+                st.caption(f"All matching signals this month, from {month_start_text} onward.")
+                st.dataframe(month_df, use_container_width=True, hide_index=True)
+                st.download_button(
+                    "Download This Month's CSV",
+                    data=month_df.to_csv(index=False).encode("utf-8-sig"),
+                    file_name="nse_breakout_this_month_shares.csv",
+                    mime="text/csv",
+                    use_container_width=True,
+                    key="download_month_csv",
+                )
+                excel_buffer = io.BytesIO()
+                with pd.ExcelWriter(excel_buffer, engine="openpyxl") as writer:
+                    today_df.to_excel(writer, index=False, sheet_name="Today's Shares")
+                    month_df.to_excel(writer, index=False, sheet_name="This Month")
+                st.download_button(
+                    "Download Excel (Both Lists)",
+                    data=excel_buffer.getvalue(),
+                    file_name="nse_breakout_daily_and_monthly_shares.xlsx",
+                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                    use_container_width=True,
+                    key="download_both_excel",
+                )
         else:
             st.warning(
                 "No stocks matched the rules in this scan."
@@ -358,7 +382,7 @@ with st.expander("Scanner Rules"):
         3. The breakout candle is the first green daily candle in the current month that closes above the previous completed calendar month's High from below.
         4. After the breakout candle, the valid sequence is exactly 1, 2, or 3 additional green daily candles followed immediately by a red candle.
         5. The red candle's High must be lower than the immediately preceding green candle's High.
-        6. Results prioritize a rising trend (latest close above the 20-day average and 5-day average above the 20-day average), then stocks closest to their 52-week Low.
+        6. Results prioritize a rising trend (latest close above the 20-day average and 5-day average above the 20-day average), then stocks closest to their 52-week Low. The results are split into Today's Shares and This Month's Shares tabs.
         7. Only one signal per symbol per month; the setup resets when a new month starts.
         8. Today's incomplete candle is ignored.
         """
